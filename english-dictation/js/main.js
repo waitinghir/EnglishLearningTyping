@@ -17,9 +17,9 @@ const synth = window.speechSynthesis;
 let currentSentence = '';
 let utterance = null;
 
-// 添加 Google TTS 配置
-const GOOGLE_TTS_API_KEY = '';
-const GOOGLE_TTS_URL = 'https://texttospeech.googleapis.com/v1/text:synthesize';
+// 使用配置文件中的設定
+const GOOGLE_TTS_API_KEY = CONFIG.GOOGLE_TTS_API_KEY;
+const GOOGLE_TTS_URL = CONFIG.GOOGLE_TTS_URL;
 
 // DOM 元素
 const playBtn = document.getElementById('playBtn');
