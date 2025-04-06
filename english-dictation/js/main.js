@@ -20,7 +20,8 @@ let utterance = null;
 // 使用配置文件中的設定
 const GOOGLE_TTS_API_KEY = CONFIG.GOOGLE_TTS_API_KEY;
 const GOOGLE_TTS_URL = CONFIG.GOOGLE_TTS_URL;
-
+console.log('>>> GOOGLE_TTS_API_KEY = ' + GOOGLE_TTS_API_KEY);
+console.log('>>> GOOGLE_TTS_URL = ' + GOOGLE_TTS_URL);
 // DOM 元素
 const playBtn = document.getElementById('playBtn');
 const newSentenceBtn = document.getElementById('newSentenceBtn');
@@ -118,7 +119,8 @@ function playWithWebSpeech() {
     
     const voices = synth.getVoices();
     const preferredVoices = ['Google US English', 'Microsoft David Desktop', 'Alex'];
-    
+ 
+
     for (const voiceName of preferredVoices) {
         const voice = voices.find(v => v.name.includes(voiceName));
         if (voice) {
