@@ -1,0 +1,19 @@
+# 忽略實際的配置文件
+js/config.js
+
+# 常見的系統文件
+.DS_Store
+.env
+.env.local
+.env.*.local
+
+# IDE 和編輯器文件
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 依賴目錄
+node_modules/
+dist/
+build/ 
