@@ -13,9 +13,8 @@ const sentences = [
 ];
 
 // 語音合成設定
-const synth = window.speechSynthesis;
 let currentSentence = '';
-let utterance = null;
+let audioPlayer = null;
 
 // DOM 元素
 const playBtn = document.getElementById('playBtn');
@@ -57,16 +56,50 @@ function generateNewSentence() {
     correction.style.display = 'none';
 }
 
+// 選擇更自然的語音
+function selectVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    // 優先選擇英文語音
+    const englishVoices = voices.filter(voice => voice.lang.includes('en'));
+    // 選擇女性語音（通常聽起來更自然）
+    const femaleVoices = englishVoices.filter(voice => voice.name.includes('Female'));
+    return femaleVoices.length > 0 ? femaleVoices[0] : englishVoices[0];
+}
+
 // 播放句子
-function playSentence() {
-    if (utterance) {
-        synth.cancel();
+async function playSentence() {
+    try {
+        if (audioPlayer) {
+            audioPlayer.pause();
+        }
+        
+        const response = await fetch('/synthesize', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: currentSentence,
+                languageCode: 'en-US',
+                voiceName: 'en-US-Neural2-F', // 使用 Google 的神經網路語音
+                speakingRate: 1.0,
+                pitch: 0.0
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('語音合成失敗');
+        }
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        
+        audioPlayer = new Audio(audioUrl);
+        audioPlayer.play();
+    } catch (error) {
+        console.error('播放錯誤:', error);
+        alert('播放失敗，請稍後再試');
     }
-    
-    utterance = new SpeechSynthesisUtterance(currentSentence);
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
-    synth.speak(utterance);
 }
 
 // 檢查答案
