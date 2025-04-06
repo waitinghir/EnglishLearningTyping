@@ -17,6 +17,10 @@ const synth = window.speechSynthesis;
 let currentSentence = '';
 let utterance = null;
 
+// 添加 Google TTS 配置
+const GOOGLE_TTS_API_KEY = '';
+const GOOGLE_TTS_URL = 'https://texttospeech.googleapis.com/v1/text:synthesize';
+
 // DOM 元素
 const playBtn = document.getElementById('playBtn');
 const newSentenceBtn = document.getElementById('newSentenceBtn');
@@ -58,14 +62,71 @@ function generateNewSentence() {
 }
 
 // 播放句子
-function playSentence() {
+async function playSentence() {
+    try {
+        // 首先嘗試使用 Google TTS
+        await playWithGoogleTTS();
+    } catch (error) {
+        console.log('Google TTS 失敗，使用備用方案');
+        playWithWebSpeech();
+    }
+}
+
+// 使用 Google TTS 播放
+async function playWithGoogleTTS() {
+    const request = {
+        input: { text: currentSentence },
+        voice: {
+            languageCode: 'en-US',
+            name: 'en-US-Neural2-D',
+            ssmlGender: 'MALE'
+        },
+        audioConfig: { audioEncoding: 'MP3' }
+    };
+
+    const response = await fetch(GOOGLE_TTS_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GOOGLE_TTS_API_KEY}`
+        },
+        body: JSON.stringify(request)
+    });
+
+    if (!response.ok) {
+        throw new Error('Google TTS API 請求失敗');
+    }
+
+    const data = await response.json();
+    const audioContent = data.audioContent;
+    
+    // 播放音頻
+    const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+    await audio.play();
+}
+
+// 使用 Web Speech API 作為備用方案
+function playWithWebSpeech() {
     if (utterance) {
         synth.cancel();
     }
     
     utterance = new SpeechSynthesisUtterance(currentSentence);
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
+    utterance.rate = 0.95;
+    utterance.pitch = 1.1;
+    utterance.volume = 1.0;
+    
+    const voices = synth.getVoices();
+    const preferredVoices = ['Google US English', 'Microsoft David Desktop', 'Alex'];
+    
+    for (const voiceName of preferredVoices) {
+        const voice = voices.find(v => v.name.includes(voiceName));
+        if (voice) {
+            utterance.voice = voice;
+            break;
+        }
+    }
+    
     synth.speak(utterance);
 }
 
